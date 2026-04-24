@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+        Security Groups
+        MERN equivalent: JWT roles: 'admin' | 'teacher' | 'student'
+    -->
+    <record id="module_school" model="ir.module.category">
+        <field name="name">Smart School ERP</field>
+        <field name="description">School Management System</field>
+        <field name="sequence">100</field>
+    </record>
+
+    <!-- Admin Group -->
+    <record id="group_school_admin" model="res.groups">
+        <field name="name">School Admin</field>
+        <field name="category_id" ref="module_school"/>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+    </record>
+
+    <!-- Teacher Group -->
+    <record id="group_school_teacher" model="res.groups">
+        <field name="name">School Teacher</field>
+        <field name="category_id" ref="module_school"/>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+    </record>
+
+    <!-- Student Group -->
+    <record id="group_school_student" model="res.groups">
+        <field name="name">School Student</field>
+        <field name="category_id" ref="module_school"/>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+    </record>
+
+    <!--
+        Record Rules (Row-level security)
+        MERN equivalent: middleware that filters DB queries by user role
+    -->
+
+  
+
+   
+</odoo>

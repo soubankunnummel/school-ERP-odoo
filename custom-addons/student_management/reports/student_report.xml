@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+        QWeb PDF Report — Student Report
+        ==================================
+        MERN equivalent: server-side PDF generation with pdfkit / puppeteer
+        Odoo uses QWeb templates (like Jinja2 / JSX for PDF rendering)
+    -->
+
+    <!-- Report Action — triggers PDF download -->
+    <record id="action_report_student" model="ir.actions.report">
+        <field name="name">Student Report Card</field>
+        <field name="model">school.student</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">student_management.report_student_template</field>
+        <field name="report_file">student_management.report_student_template</field>
+        <field name="binding_model_id" ref="model_school_student"/>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="base.paperformat_euro"/>
+    </record>
+
+    <!-- Report List Action (from menu) -->
+    <record id="action_report_student_list" model="ir.actions.act_window">
+        <field name="name">📄 Student Reports</field>
+        <field name="res_model">school.student</field>
+        <field name="view_mode">tree</field>
+        <field name="context">{'report_mode': True}</field>
+    </record>
+
+    <!--
+        QWeb Template — the actual PDF layout
+        Think of this like a React component that renders to HTML → PDF
+    -->
+    <template id="report_student_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="student">
+                <t t-call="web.external_layout">
+                    <div class="page">
+
+                        <!-- Header -->
+                        <div class="row mb-4" style="border-bottom: 3px solid #2c3e50; padding-bottom: 15px;">
+                            <div class="col-8">
+                                <h2 style="color: #2c3e50; margin: 0;">
+                                    📋 Student Report Card
+                                </h2>
+                                <p style="color: #7f8c8d; margin: 4px 0 0 0;">
+                                    Smart School ERP — Academic Year
+                                    <t t-esc="student.class_id.academic_year or '2024-25'"/>
+                                </p>
+                            </div>
+                            <div class="col-4 text-right">
+                                <!-- Avatar from DummyJSON API -->
+                                <t t-if="student.avatar_url">
+                                    <img t-att-src="student.avatar_url"
+                                         style="width:80px;height:80px;border-radius:50%;border:3px solid #2c3e50;"
+                                         alt="Student Photo"/>
+                                </t>
+                            </div>
+                        </div>
+
+                        <!-- Student Info -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h3 style="color: #2c3e50;">
+                                    <t t-esc="student.name"/>
+                                </h3>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <table class="table table-bordered table-sm">
+                                    <thead style="background-color: #2c3e50; color: white;">
+                                        <tr>
+                                            <th colspan="2">Personal Details</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><strong>Roll Number</strong></td>
+                                            <td><t t-esc="student.roll_number"/></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Age</strong></td>
+                                            <td><t t-esc="student.age"/></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Gender</strong></td>
+                                            <td><t t-esc="dict(student._fields['gender'].selection).get(student.gender, '')"/></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Email</strong></td>
+                                            <td><t t-esc="student.email or 'N/A'"/></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Phone</strong></td>
+                                            <td><t t-esc="student.phone or 'N/A'"/></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="col-6">
+                                <table class="table table-bordered table-sm">
+                                    <thead style="background-color: #2c3e50; color: white;">
+                                        <tr>
+                                            <th colspan="2">Academic Details</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><strong>Class</strong></td>
+                                            <td><t t-esc="student.class_id.name if student.class_id else 'N/A'"/></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Class Teacher</strong></td>
+                                            <td><t t-esc="student.class_id.teacher_id.name if student.class_id.teacher_id else 'N/A'"/></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Subjects Enrolled</strong></td>
+                                            <td><t t-esc="student.subject_count"/></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Status</strong></td>
+                                            <td>
+                                                <t t-esc="dict(student._fields['state'].selection).get(student.state, '')"/>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Fee Discount</strong></td>
+                                            <td>
+                                                <t t-if="student.has_fee_discount">✅ Applied</t>
+                                                <t t-else="">❌ Not applicable</t>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Subjects Table -->
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <h4 style="color: #2c3e50;">📚 Enrolled Subjects</h4>
+                                <table class="table table-bordered table-sm">
+                                    <thead style="background-color: #3498db; color: white;">
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Subject</th>
+                                            <th>Code</th>
+                                            <th>Teacher</th>
+                                            <th>Credit Hours</th>
+                                            <th>Type</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <t t-foreach="student.subject_ids" t-as="subj">
+                                            <tr>
+                                                <td><t t-esc="subj_index + 1"/></td>
+                                                <td><t t-esc="subj.name"/></td>
+                                                <td><t t-esc="subj.code or '-'"/></td>
+                                                <td><t t-esc="subj.teacher_id.name if subj.teacher_id else '-'"/></td>
+                                                <td><t t-esc="subj.credit_hours"/></td>
+                                                <td>
+                                                    <t t-if="subj.is_elective">Elective</t>
+                                                    <t t-else="">Core</t>
+                                                </td>
+                                            </tr>
+                                        </t>
+                                        <t t-if="not student.subject_ids">
+                                            <tr>
+                                                <td colspan="6" class="text-center text-muted">
+                                                    No subjects enrolled.
+                                                </td>
+                                            </tr>
+                                        </t>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Attendance Summary -->
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <h4 style="color: #2c3e50;">📅 Attendance Summary</h4>
+                                <div class="row">
+                                    <div class="col-3 text-center"
+                                         style="background:#ecf0f1;padding:10px;border-radius:5px;margin:5px;">
+                                        <div style="font-size:24px;font-weight:bold;color:#2c3e50;">
+                                            <t t-esc="student.total_attendance"/>
+                                        </div>
+                                        <div>Total Days</div>
+                                    </div>
+                                    <div class="col-3 text-center"
+                                         style="background:#d5f5e3;padding:10px;border-radius:5px;margin:5px;">
+                                        <div style="font-size:24px;font-weight:bold;color:#27ae60;">
+                                            <t t-esc="student.present_days"/>
+                                        </div>
+                                        <div>Present</div>
+                                    </div>
+                                    <div class="col-3 text-center"
+                                         style="background:#fadbd8;padding:10px;border-radius:5px;margin:5px;">
+                                        <div style="font-size:24px;font-weight:bold;color:#e74c3c;">
+                                            <t t-esc="student.absent_days"/>
+                                        </div>
+                                        <div>Absent</div>
+                                    </div>
+                                    <div class="col-3 text-center"
+                                         style="background:#d6eaf8;padding:10px;border-radius:5px;margin:5px;">
+                                        <div style="font-size:24px;font-weight:bold;color:#2980b9;">
+                                            <t t-esc="'%.1f' % student.attendance_percentage"/>%
+                                        </div>
+                                        <div>Attendance %</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Footer -->
+                        <div style="margin-top: 40px; border-top: 1px solid #bdc3c7; padding-top: 10px;">
+                            <div class="row">
+                                <div class="col-6 text-muted" style="font-size:11px;">
+                                    Generated by Smart School ERP
+                                </div>
+                                <div class="col-6 text-right text-muted" style="font-size:11px;">
+                                    Report Date: <t t-esc="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y')"/>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+</odoo>

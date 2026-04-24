@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+        Scheduled Actions (Cron Jobs)
+        MERN equivalent: node-cron / setTimeout on server
+        e.g., cron.schedule('0 8 * * *', () => markAbsent())
+    -->
+
+    <!-- Run daily at 11 PM: auto-mark students absent if no attendance entry -->
+    <record id="cron_auto_mark_absent" model="ir.cron">
+        <field name="name">School: Auto-mark Absent Students</field>
+        <field name="model_id" ref="model_school_student"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_auto_mark_absent()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="numbercall">-1</field>
+        <field name="active">True</field>
+    </record>
+
+    <record id="cron_mark_overdue_fees" model="ir.cron">
+        <field name="name">School: Mark Overdue Fees</field>
+        <field name="model_id" ref="model_school_fee"/>
+        <field name="state">code</field>
+        <field name="code">model._mark_overdue_fees()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="numbercall">-1</field>
+        <field name="active">True</field>
+    </record>
+</odoo>

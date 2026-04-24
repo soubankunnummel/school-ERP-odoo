@@ -1,0 +1,20 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_student_admin,school.student admin,model_school_student,group_school_admin,1,1,1,1
+access_student_teacher,school.student teacher,model_school_student,group_school_teacher,1,1,0,0
+access_student_student,school.student student,model_school_student,group_school_student,1,0,0,0
+access_teacher_admin,school.teacher admin,model_school_teacher,group_school_admin,1,1,1,1
+access_teacher_teacher,school.teacher teacher,model_school_teacher,group_school_teacher,1,0,0,0
+access_class_admin,school.class admin,model_school_class,group_school_admin,1,1,1,1
+access_class_teacher,school.class teacher,model_school_class,group_school_teacher,1,1,0,0
+access_class_student,school.class student,model_school_class,group_school_student,1,0,0,0
+access_subject_admin,school.subject admin,model_school_subject,group_school_admin,1,1,1,1
+access_subject_teacher,school.subject teacher,model_school_subject,group_school_teacher,1,1,0,0
+access_subject_student,school.subject student,model_school_subject,group_school_student,1,0,0,0
+access_attendance_admin,school.attendance admin,model_school_attendance,group_school_admin,1,1,1,1
+access_attendance_teacher,school.attendance teacher,model_school_attendance,group_school_teacher,1,1,1,0
+access_attendance_student,school.attendance student,model_school_attendance,group_school_student,1,0,0,0
+access_fee_admin,school.fee admin,model_school_fee,group_school_admin,1,1,1,1
+access_fee_teacher,school.fee teacher,model_school_fee,group_school_teacher,1,0,0,0
+access_settings_admin,school.settings admin,model_school_settings,group_school_admin,1,1,1,1
+access_bulk_wizard_all,school.bulk.attendance.wizard all,model_school_bulk_attendance_wizard,base.group_user,1,1,1,1
+access_bulk_line_all,school.bulk.attendance.line all,model_school_bulk_attendance_line,base.group_user,1,1,1,1

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Settings Form View -->
+    <record id="view_school_settings_form" model="ir.ui.view">
+        <field name="name">school.settings.form</field>
+        <field name="model">school.settings</field>
+        <field name="arch" type="xml">
+            <form string="⚙️ School Settings">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>⚙️ School ERP Settings</h1>
+                        <p class="text-muted">
+                            Configure global settings for the school.
+                            <!-- MERN equivalent: .env / config file / admin settings page -->
+                        </p>
+                    </div>
+
+                    <group string="🏫 School Info">
+                        <field name="school_name"/>
+                        <field name="academic_year"/>
+                    </group>
+
+                    <group string="📅 Attendance Settings">
+                        <field name="min_attendance_percentage"
+                               help="Students below this % will be flagged in reports."/>
+                        <field name="auto_mark_absent"
+                               help="Cron job will auto-mark absent if no attendance entry found for the day."/>
+                    </group>
+
+                    <group string="💰 Fee &amp; Discount Settings">
+                        <field name="fee_discount_percentage"
+                               help="Discount % applied to fees for qualifying students."/>
+                        <field name="discount_subject_threshold"
+                               help="Students enrolled in more subjects than this value get a fee discount."/>
+                    </group>
+
+                    <div class="alert alert-info mt-3" role="alert">
+                        <strong>💡 Smart Discount Rule:</strong>
+                        If a student enrolls in more than
+                        <strong><field name="discount_subject_threshold" readonly="1" nolabel="1"/></strong>
+                        subjects, a
+                        <strong><field name="fee_discount_percentage" readonly="1" nolabel="1"/>%</strong>
+                        discount is automatically applied to their fees.
+                    </div>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_school_settings" model="ir.actions.act_window">
+        <field name="name">⚙️ School Settings</field>
+        <field name="res_model">school.settings</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_school_settings_form"/>
+        <!-- res_id=1 forces it to open the first (singleton) record -->
+        <field name="target">inline</field>
+        <field name="context">{'form_view_initial_mode': 'edit'}</field>
+    </record>
+
+</odoo>

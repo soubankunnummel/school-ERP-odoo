@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Tree View -->
+    <record id="view_teacher_tree" model="ir.ui.view">
+        <field name="name">school.teacher.tree</field>
+        <field name="model">school.teacher</field>
+        <field name="arch" type="xml">
+            <tree string="Teachers">
+                <field name="avatar_image" widget="image"
+                       options="{'size': [32,32]}" optional="show"/>
+                <field name="employee_id"/>
+                <field name="name"/>
+                <field name="email"/>
+                <field name="qualification" optional="show"/>
+                <field name="experience_years" optional="show"/>
+                <field name="subject_count" string="Subjects"/>
+                <field name="class_count" string="Classes"/>
+                <field name="student_count" string="Students"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_teacher_form" model="ir.ui.view">
+        <field name="name">school.teacher.form</field>
+        <field name="model">school.teacher</field>
+        <field name="arch" type="xml">
+            <form string="Teacher">
+                <header>
+                    <button name="action_refresh_avatar"
+                            string="🔄 Refresh Avatar (API)"
+                            type="object"
+                            class="btn-secondary"/>
+                </header>
+                <sheet>
+                    <div class="oe_title d-flex align-items-center gap-3">
+                        <field name="avatar_image" widget="image"
+                               options="{'img_class': 'rounded-circle', 'size': [90,90]}"/>
+                        <div>
+                            <h1><field name="name" placeholder="Teacher Full Name"/></h1>
+                            <div class="text-muted">
+                                <field name="employee_id" readonly="1"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Stat buttons -->
+                    <div class="oe_button_box" name="button_box">
+                        <button class="oe_stat_button" icon="fa-users" type="object"
+                                name="action_view_students">
+                            <field name="student_count" widget="statinfo" string="Students"/>
+                        </button>
+                        <button class="oe_stat_button" icon="fa-book" type="object"
+                                name="action_view_subjects">
+                            <field name="subject_count" widget="statinfo" string="Subjects"/>
+                        </button>
+                        <button class="oe_stat_button" icon="fa-chalkboard-teacher"
+                                type="object" name="action_view_classes">
+                            <field name="class_count" widget="statinfo" string="Classes"/>
+                        </button>
+                    </div>
+
+                    <group>
+                        <group string="Personal Details">
+                            <field name="name"/>
+                            <field name="employee_id" readonly="1"/>
+                            <field name="email"/>
+                            <field name="phone"/>
+                        </group>
+                        <group string="Professional">
+                            <field name="qualification"/>
+                            <field name="experience_years"/>
+                            <field name="avatar_url" widget="url"
+                                   string="Avatar URL (DummyJSON)" readonly="1"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="📚 Subjects" name="subjects">
+                            <field name="subject_ids">
+                                <tree editable="bottom">
+                                    <field name="name"/>
+                                    <field name="code"/>
+                                    <field name="credit_hours"/>
+                                    <field name="is_elective"/>
+                                    <field name="student_count" readonly="1"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="🏫 Classes" name="classes">
+                            <field name="class_ids">
+                                <tree>
+                                    <field name="name"/>
+                                    <field name="grade"/>
+                                    <field name="section"/>
+                                    <field name="student_count"/>
+                                    <field name="academic_year"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="view_teacher_search" model="ir.ui.view">
+        <field name="name">school.teacher.search</field>
+        <field name="model">school.teacher</field>
+        <field name="arch" type="xml">
+            <search string="Search Teachers">
+                <field name="name"/>
+                <field name="email"/>
+                <field name="qualification"/>
+                <group expand="0" string="Group By">
+                    <filter string="Qualification" name="group_qualification"
+                            context="{'group_by': 'qualification'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_school_teacher" model="ir.actions.act_window">
+        <field name="name">Teachers</field>
+        <field name="res_model">school.teacher</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_teacher_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No teachers yet!</p>
+        </field>
+    </record>
+
+</odoo>

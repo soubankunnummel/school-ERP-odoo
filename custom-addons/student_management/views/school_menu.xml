@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Root menu item -->
+    <menuitem id="menu_school_root"
+              name="🏫 School ERP"
+              sequence="10"/>
+
+    <!-- Dashboard -->
+    <menuitem id="menu_school_dashboard"
+              name="Dashboard"
+              parent="menu_school_root"
+              action="student_management.action_school_student"
+              sequence="1"/>
+
+    <!-- Students -->
+    <menuitem id="menu_school_students_root"
+              name="Students"
+              parent="menu_school_root"
+              sequence="10"/>
+    <menuitem id="menu_school_students"
+              name="All Students"
+              parent="menu_school_students_root"
+              action="student_management.action_school_student"
+              sequence="1"/>
+    <menuitem id="menu_school_attendance"
+              name="Attendance"
+              parent="menu_school_students_root"
+              action="student_management.action_school_attendance"
+              sequence="2"/>
+    <menuitem id="menu_school_fees"
+              name="Fees"
+              parent="menu_school_students_root"
+              action="student_management.action_school_fee"
+              sequence="3"/>
+
+    <!-- Academics -->
+    <menuitem id="menu_school_academics_root"
+              name="Academics"
+              parent="menu_school_root"
+              sequence="20"/>
+    <menuitem id="menu_school_classes"
+              name="Classes"
+              parent="menu_school_academics_root"
+              action="student_management.action_school_class"
+              sequence="1"/>
+    <menuitem id="menu_school_subjects"
+              name="Subjects"
+              parent="menu_school_academics_root"
+              action="student_management.action_school_subject"
+              sequence="2"/>
+    <menuitem id="menu_school_teachers"
+              name="Teachers"
+              parent="menu_school_academics_root"
+              action="student_management.action_school_teacher"
+              sequence="3"/>
+
+    <!-- Reports -->
+    <menuitem id="menu_school_reports_root"
+              name="Reports"
+              parent="menu_school_root"
+              sequence="30"/>
+    <menuitem id="menu_report_student"
+              name="Student Report"
+              parent="menu_school_reports_root"
+              action="student_management.action_report_student_list"
+              sequence="1"/>
+    <menuitem id="menu_report_attendance"
+              name="Attendance Report"
+              parent="menu_school_reports_root"
+              action="student_management.action_report_attendance_list"
+              sequence="2"/>
+
+    <!-- Settings -->
+    <menuitem id="menu_school_settings"
+              name="Settings"
+              parent="menu_school_root"
+              action="student_management.action_school_settings"
+              sequence="99"
+              groups="student_management.group_school_admin"/>
+</odoo>

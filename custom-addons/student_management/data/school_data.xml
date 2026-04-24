@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Sequences — like auto-increment IDs with prefixes (MERN: nanoid / uuid) -->
+
+    <record id="seq_student" model="ir.sequence">
+        <field name="name">Student Sequence</field>
+        <field name="code">school.student.sequence</field>
+        <field name="prefix">STU/%(year)s/</field>
+        <field name="padding">4</field>
+        <field name="number_next">1</field>
+        <field name="number_increment">1</field>
+    </record>
+
+    <record id="seq_teacher" model="ir.sequence">
+        <field name="name">Teacher Sequence</field>
+        <field name="code">school.teacher.sequence</field>
+        <field name="prefix">TCH/%(year)s/</field>
+        <field name="padding">3</field>
+        <field name="number_next">1</field>
+        <field name="number_increment">1</field>
+    </record>
+
+    <record id="seq_fee" model="ir.sequence">
+        <field name="name">Fee Sequence</field>
+        <field name="code">school.fee.sequence</field>
+        <field name="prefix">FEE/%(year)s/</field>
+        <field name="padding">4</field>
+        <field name="number_next">1</field>
+        <field name="number_increment">1</field>
+    </record>
+
+    <!-- Default Settings Singleton -->
+    <record id="school_settings_default" model="school.settings">
+        <field name="name">School Configuration</field>
+        <field name="school_name">Smart School ERP</field>
+        <field name="min_attendance_percentage">75.0</field>
+        <field name="fee_discount_percentage">10.0</field>
+        <field name="discount_subject_threshold">5</field>
+        <field name="academic_year">2024-25</field>
+        <field name="auto_mark_absent">True</field>
+    </record>
+</odoo>

@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Report Action -->
+    <record id="action_report_attendance" model="ir.actions.report">
+        <field name="name">Attendance Report</field>
+        <field name="model">school.student</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">student_management.report_attendance_template</field>
+        <field name="report_file">student_management.report_attendance_template</field>
+        <field name="binding_model_id" ref="model_school_student"/>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="base.paperformat_euro"/>
+    </record>
+
+    <!-- Menu action (from Reports menu) -->
+    <record id="action_report_attendance_list" model="ir.actions.act_window">
+        <field name="name">📊 Attendance Reports</field>
+        <field name="res_model">school.student</field>
+        <field name="view_mode">tree</field>
+        <field name="context">{'search_default_filter_confirmed': 1}</field>
+    </record>
+
+    <!-- QWeb Template -->
+    <template id="report_attendance_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="student">
+                <t t-call="web.external_layout">
+                    <div class="page">
+
+                        <!-- Header -->
+                        <div style="border-bottom: 3px solid #8e44ad; padding-bottom: 15px; margin-bottom: 20px;">
+                            <div class="row">
+                                <div class="col-8">
+                                    <h2 style="color: #8e44ad; margin: 0;">
+                                        📅 Attendance Report
+                                    </h2>
+                                    <h4 style="color: #2c3e50; margin: 5px 0 0 0;">
+                                        <t t-esc="student.name"/>
+                                        — <t t-esc="student.roll_number"/>
+                                    </h4>
+                                    <p class="text-muted">
+                                        Class: <t t-esc="student.class_id.name if student.class_id else 'N/A'"/>
+                                        | Academic Year:
+                                        <t t-esc="student.class_id.academic_year if student.class_id else '2024-25'"/>
+                                    </p>
+                                </div>
+                                <div class="col-4 text-right">
+                                    <t t-if="student.avatar_url">
+                                        <img t-att-src="student.avatar_url"
+                                             style="width:70px;height:70px;border-radius:50%;border:3px solid #8e44ad;"
+                                             alt="Avatar"/>
+                                    </t>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Summary Cards -->
+                        <div class="row mb-4">
+                            <div class="col-3 text-center"
+                                 style="background:#f8f9fa;padding:15px;border-radius:8px;border:1px solid #dee2e6;">
+                                <div style="font-size:28px;font-weight:bold;color:#495057;">
+                                    <t t-esc="student.total_attendance"/>
+                                </div>
+                                <div style="color:#6c757d;font-size:12px;">TOTAL DAYS</div>
+                            </div>
+                            <div class="col-3 text-center"
+                                 style="background:#d4edda;padding:15px;border-radius:8px;border:1px solid #c3e6cb;">
+                                <div style="font-size:28px;font-weight:bold;color:#155724;">
+                                    <t t-esc="student.present_days"/>
+                                </div>
+                                <div style="color:#155724;font-size:12px;">PRESENT</div>
+                            </div>
+                            <div class="col-3 text-center"
+                                 style="background:#f8d7da;padding:15px;border-radius:8px;border:1px solid #f5c6cb;">
+                                <div style="font-size:28px;font-weight:bold;color:#721c24;">
+                                    <t t-esc="student.absent_days"/>
+                                </div>
+                                <div style="color:#721c24;font-size:12px;">ABSENT</div>
+                            </div>
+                            <div class="col-3 text-center"
+                                 style="background:#cce5ff;padding:15px;border-radius:8px;border:1px solid #b8daff;">
+                                <div style="font-size:28px;font-weight:bold;color:#004085;">
+                                    <t t-esc="'%.1f' % student.attendance_percentage"/>%
+                                </div>
+                                <div style="color:#004085;font-size:12px;">PERCENTAGE</div>
+                            </div>
+                        </div>
+
+                        <!-- Attendance Status Warning -->
+                        <t t-if="student.attendance_percentage &lt; 75">
+                            <div style="background:#fff3cd;border:1px solid #ffc107;border-radius:5px;padding:10px;margin-bottom:15px;">
+                                ⚠️ <strong>Warning:</strong> Attendance below minimum threshold (75%).
+                                Student may not be eligible for exams.
+                            </div>
+                        </t>
+
+                        <!-- Detailed Attendance Table -->
+                        <h4 style="color: #2c3e50;">Attendance Log</h4>
+                        <table class="table table-bordered table-sm" style="font-size:12px;">
+                            <thead style="background-color: #8e44ad; color: white;">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Date</th>
+                                    <th>Day</th>
+                                    <th>Status</th>
+                                    <th>Note</th>
+                                    <th>Marked By</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="student.attendance_ids.sorted(key=lambda r: r.date)" t-as="att">
+                                    <tr t-attf-style="background-color: #{
+                                        '#d4edda' if att.status == 'present' else
+                                        '#f8d7da' if att.status == 'absent' else
+                                        '#fff3cd' if att.status == 'late' else '#e2e3e5'
+                                    };">
+                                        <td><t t-esc="att_index + 1"/></td>
+                                        <td><t t-esc="att.date.strftime('%d/%m/%Y') if att.date else ''"/></td>
+                                        <td><t t-esc="att.date.strftime('%A') if att.date else ''"/></td>
+                                        <td>
+                                            <t t-esc="dict(att._fields['status'].selection).get(att.status, att.status).upper()"/>
+                                        </td>
+                                        <td><t t-esc="att.note or ''"/></td>
+                                        <td><t t-esc="att.marked_by.name if att.marked_by else 'System'"/></td>
+                                    </tr>
+                                </t>
+                                <t t-if="not student.attendance_ids">
+                                    <tr>
+                                        <td colspan="6" class="text-center text-muted">
+                                            No attendance records found.
+                                        </td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+
+                        <!-- Footer -->
+                        <div style="margin-top: 30px; border-top: 1px solid #bdc3c7; padding-top: 10px;">
+                            <div class="row">
+                                <div class="col-6 text-muted" style="font-size:11px;">
+                                    Generated by Smart School ERP
+                                </div>
+                                <div class="col-6 text-right text-muted" style="font-size:11px;">
+                                    <t t-esc="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y %H:%M')"/>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+</odoo>

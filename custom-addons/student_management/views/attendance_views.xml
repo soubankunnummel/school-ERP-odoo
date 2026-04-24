@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Tree View -->
+    <record id="view_attendance_tree" model="ir.ui.view">
+        <field name="name">school.attendance.tree</field>
+        <field name="model">school.attendance</field>
+        <field name="arch" type="xml">
+            <tree string="Attendance"
+                  decoration-success="status == 'present'"
+                  decoration-danger="status == 'absent'"
+                  decoration-warning="status == 'late'"
+                  multi_edit="1">
+                <field name="student_id"/>
+                <field name="class_id" optional="show"/>
+                <field name="date"/>
+                <field name="status" widget="badge"
+                       decoration-success="status == 'present'"
+                       decoration-danger="status == 'absent'"
+                       decoration-warning="status == 'late'"
+                       decoration-info="status == 'excused'"/>
+                <field name="note" optional="show"/>
+                <field name="marked_by" optional="show"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_attendance_form" model="ir.ui.view">
+        <field name="name">school.attendance.form</field>
+        <field name="model">school.attendance</field>
+        <field name="arch" type="xml">
+            <form string="Attendance Record">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="student_id" options="{'no_create': True}"/>
+                            <field name="class_id" readonly="1"/>
+                            <field name="date"/>
+                        </group>
+                        <group>
+                            <field name="status"/>
+                            <field name="marked_by" readonly="1"/>
+                            <field name="note" widget="text"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="view_attendance_search" model="ir.ui.view">
+        <field name="name">school.attendance.search</field>
+        <field name="model">school.attendance</field>
+        <field name="arch" type="xml">
+            <search string="Search Attendance">
+                <field name="student_id"/>
+                <field name="class_id"/>
+                <field name="date"/>
+                <filter string="Present" name="filter_present"
+                        domain="[('status','=','present')]"/>
+                <filter string="Absent" name="filter_absent"
+                        domain="[('status','=','absent')]"/>
+                <filter string="Late" name="filter_late"
+                        domain="[('status','=','late')]"/>
+                <filter string="Today" name="filter_today"
+                        domain="[('date','=', context_today().strftime('%Y-%m-%d'))]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Student" name="group_student"
+                            context="{'group_by': 'student_id'}"/>
+                    <filter string="Class" name="group_class"
+                            context="{'group_by': 'class_id'}"/>
+                    <filter string="Date" name="group_date"
+                            context="{'group_by': 'date:day'}"/>
+                    <filter string="Status" name="group_status"
+                            context="{'group_by': 'status'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Graph View — MERN: <BarChart /> / pie chart -->
+    <record id="view_attendance_graph" model="ir.ui.view">
+        <field name="name">school.attendance.graph</field>
+        <field name="model">school.attendance</field>
+        <field name="arch" type="xml">
+            <graph string="Attendance Statistics" type="bar">
+                <field name="class_id" type="row"/>
+                <field name="status" type="col"/>
+                <field name="student_id" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- Pivot View — MERN: pivot table / cross-tab component -->
+    <record id="view_attendance_pivot" model="ir.ui.view">
+        <field name="name">school.attendance.pivot</field>
+        <field name="model">school.attendance</field>
+        <field name="arch" type="xml">
+            <pivot string="Attendance Pivot">
+                <field name="class_id" type="row"/>
+                <field name="date" type="col" interval="month"/>
+                <field name="student_id" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_school_attendance" model="ir.actions.act_window">
+        <field name="name">Attendance</field>
+        <field name="res_model">school.attendance</field>
+        <field name="view_mode">tree,form,graph,pivot</field>
+        <field name="search_view_id" ref="view_attendance_search"/>
+        <field name="context">{'search_default_filter_today': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No attendance records!</p>
+            <p>Use the Bulk Attendance button to mark attendance for a whole class.</p>
+        </field>
+    </record>
+
+    <!-- ================================================================ -->
+    <!--  BULK ATTENDANCE WIZARD View                                      -->
+    <!--  MERN equivalent: a modal dialog component                       -->
+    <!-- ================================================================ -->
+    <record id="view_bulk_attendance_wizard_form" model="ir.ui.view">
+        <field name="name">school.bulk.attendance.wizard.form</field>
+        <field name="model">school.bulk.attendance.wizard</field>
+        <field name="arch" type="xml">
+            <form string="📅 Bulk Mark Attendance">
+                <group>
+                    <group>
+                        <field name="class_id" options="{'no_create': True}"/>
+                        <field name="date"/>
+                    </group>
+                    <group>
+                        <field name="default_status"/>
+                    </group>
+                </group>
+
+                <separator string="Students"/>
+                <field name="line_ids">
+                    <tree editable="bottom"
+                          decoration-success="status == 'present'"
+                          decoration-danger="status == 'absent'">
+                        <field name="student_id" readonly="1"/>
+                        <field name="status" widget="radio" options="{'horizontal': true}"/>
+                    </tree>
+                </field>
+
+                <footer>
+                    <button name="action_submit" string="✅ Submit Attendance"
+                            type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Wizard Action — opens the modal -->
+    <record id="action_bulk_attendance_wizard" model="ir.actions.act_window">
+        <field name="name">📅 Bulk Mark Attendance</field>
+        <field name="res_model">school.bulk.attendance.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field><!-- 'new' = opens as dialog/modal -->
+    </record>
+
+    <!-- Button in the attendance list header to open wizard -->
+    <record id="view_attendance_tree_with_wizard_btn" model="ir.ui.view">
+        <field name="name">school.attendance.tree.wizard.btn</field>
+        <field name="model">school.attendance</field>
+        <field name="inherit_id" ref="view_attendance_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//tree" position="attributes">
+                <attribute name="create">true</attribute>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

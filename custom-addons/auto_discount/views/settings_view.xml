@@ -1,0 +1,40 @@
+<odoo>
+    <record id="view_auto_discount_settings" model="ir.ui.view">
+        <field name="name">auto.discount.settings</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base_setup.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+
+            <!-- ✅ Correct placement -->
+            <xpath expr="//form" position="inside">
+                
+                <div class="app_settings_block" data-string="Auto Discount">
+                    <h2>Auto Discount</h2>
+
+                    <div class="row mt16 o_settings_container">
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_left_pane"/>
+                            <div class="o_setting_right_pane">
+                                <label for="discount_min_amount"/>
+                                <div class="text-muted">Minimum amount to trigger discount</div>
+                                <field name="discount_min_amount"/>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_left_pane"/>
+                            <div class="o_setting_right_pane">
+                                <label for="discount_percentage"/>
+                                <div class="text-muted">Discount percentage</div>
+                                <field name="discount_percentage"/>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </xpath>
+
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,69 @@
+/* ============================================================
+   Smart School ERP — Custom Styles
+   MERN equivalent: index.css / App.css / Tailwind config
+   ============================================================ */
+
+/* ---- Color variables (like CSS custom props / Tailwind theme) ---- */
+:root {
+    --school-primary: #2c3e50;
+    --school-accent: #3498db;
+    --school-success: #27ae60;
+    --school-danger: #e74c3c;
+    --school-warning: #f39c12;
+    --school-purple: #8e44ad;
+}
+
+/* ---- Student avatar in list view ---- */
+.o_list_view .o_field_image img {
+    border-radius: 50% !important;
+    border: 2px solid var(--school-accent);
+    object-fit: cover;
+}
+
+/* ---- Kanban card polish ---- */
+.o_kanban_view .oe_kanban_card {
+    border-radius: 12px;
+    border: 1px solid #ecf0f1;
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.o_kanban_view .oe_kanban_card:hover {
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    transform: translateY(-2px);
+}
+
+/* ---- Status badge colors ---- */
+.badge-school-draft   { background-color: #95a5a6; color: white; }
+.badge-school-confirmed { background-color: var(--school-success); color: white; }
+.badge-school-graduated { background-color: var(--school-purple); color: white; }
+
+/* ---- Attendance progress bar ---- */
+.o_progressbar .o_progressbar_value {
+    background: linear-gradient(90deg, var(--school-danger), var(--school-warning), var(--school-success));
+}
+
+/* ---- Form view header polish ---- */
+.o_form_view .o_form_sheet {
+    border-radius: 8px;
+}
+
+/* ---- Dashboard stat buttons ---- */
+.oe_stat_button {
+    border-radius: 8px !important;
+    transition: background-color 0.2s ease;
+}
+
+.oe_stat_button:hover {
+    background-color: #ecf0f1 !important;
+}
+
+/* ---- Fee overdue highlight ---- */
+.o_list_view tr.o_data_row.text-danger td {
+    font-weight: 600;
+}
+
+/* ---- School ERP header branding ---- */
+.o_main_navbar .o_menu_brand {
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}

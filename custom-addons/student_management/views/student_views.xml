@@ -1,0 +1,280 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ================================================================ -->
+    <!--  STUDENT — Tree View (List)                                       -->
+    <!--  MERN equivalent: <StudentTable /> component with columns         -->
+    <!-- ================================================================ -->
+    <record id="view_student_tree" model="ir.ui.view">
+        <field name="name">school.student.tree</field>
+        <field name="model">school.student</field>
+        <field name="arch" type="xml">
+            <tree string="Students" decoration-success="state == 'confirmed'" decoration-muted="state == 'graduated'" decoration-warning="attendance_percentage &lt; 75" multi_edit="1">
+                <field name="roll_number" optional="show"/>
+                <field name="avatar_image" widget="image" options="{'img_class': 'rounded-circle', 'size': [32,32]}" optional="show"/>
+                <field name="name"/>
+                <field name="age" optional="show"/>
+                <field name="class_id"/>
+                <field name="subject_count" string="Subjects"/>
+                <field name="attendance_percentage" string="Attendance %" widget="progressbar" options="{'editable': false, 'current_value': 'attendance_percentage', 'max_value': 100}"/>
+                <field name="has_fee_discount" optional="show"/>
+                <field name="total_fee_due" optional="show"/>
+                <field name="state" widget="badge" decoration-success="state == 'confirmed'" decoration-warning="state == 'draft'" decoration-info="state == 'graduated'"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- ================================================================ -->
+    <!--  STUDENT — Form View                                              -->
+    <!--  MERN equivalent: <StudentDetailForm /> with all fields           -->
+    <!-- ================================================================ -->
+    <record id="view_student_form" model="ir.ui.view">
+        <field name="name">school.student.form</field>
+        <field name="model">school.student</field>
+        <field name="arch" type="xml">
+            <form string="Student">
+
+                <!-- Status Bar — MERN: stepper / progress indicator -->
+                <header>
+                    <button name="action_confirm" string="✅ Confirm Enrollment" type="object" class="btn-primary" invisible="state != 'draft'"/>
+                    <button name="action_graduate" string="🎓 Graduate" type="object" class="btn-success" invisible="state != 'confirmed'"/>
+                    <button name="action_reset_draft" string="↩ Reset to Draft" type="object" invisible="state == 'draft'"/>
+                    <button name="action_refresh_avatar" string="🔄 Refresh Avatar (API)" type="object" class="btn-secondary" help="Fetches profile photo from DummyJSON API"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,graduated"/>
+                </header>
+
+                <sheet>
+                    <!-- Avatar + Name header block -->
+                    <div class="oe_title d-flex align-items-center gap-3">
+                        <field name="avatar_image" widget="image" options="{'img_class': 'rounded-circle', 'size': [90,90]}" class="mr-3"/>
+                        <div>
+                            <label for="name" class="oe_edit_only"/>
+                            <h1>
+                                <field name="name" placeholder="Student Full Name"/>
+                            </h1>
+                            <div class="text-muted">
+                                <field name="roll_number" readonly="1"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Smart Buttons (stat buttons at top) -->
+                    <!-- MERN equivalent: summary cards / quick stats -->
+                    <!-- <div class="oe_button_box" name="button_box">
+                        <button type="object" name="action_school_attendance" class="oe_stat_button" icon="fa-calendar-check-o">
+                            <field name="total_attendance" widget="statinfo" string="Attendance Days"/>
+                        </button>
+                        <button type="object" name="action_school_fee" class="oe_stat_button" icon="fa-money">
+                            <field name="total_fee_due" widget="statinfo" string="Fee Due"/>
+                        </button>
+                        <button type="object" name="action_school_subject" class="oe_stat_button" icon="fa-book">
+                            <field name="subject_count" widget="statinfo" string="Subjects"/>
+                        </button>
+                    </div> -->
+
+                    <div class="oe_button_box" name="button_box">
+                        <button type="object" name="action_view_attendance" class="oe_stat_button" icon="fa-calendar-check-o">
+                            <field name="total_attendance" widget="statinfo" string="Attendance Days"/>
+                        </button>
+                        <button type="object" name="action_view_fees" class="oe_stat_button" icon="fa-money">
+                            <field name="total_fee_due" widget="statinfo" string="Fee Due"/>
+                        </button>
+                        <button type="object" name="action_view_subjects" class="oe_stat_button" icon="fa-book">
+                            <field name="subject_count" widget="statinfo" string="Subjects"/>
+                        </button>
+                    </div>
+
+                    <!-- Discount badge -->
+                    <div invisible="has_fee_discount == False">
+                        <span class="badge badge-success">
+                            🏷️ Fee Discount Applied (enrolled in &gt;5 subjects)
+                        </span>
+                    </div>
+
+                    <!-- Tab Pages — MERN: <Tabs /> component -->
+                    <notebook>
+                        <!-- Tab 1: Personal Info -->
+                        <page string="👤 Personal Info" name="personal">
+                            <group>
+                                <group string="Basic Details">
+                                    <field name="name"/>
+                                    <field name="roll_number" readonly="1"/>
+                                    <field name="age"/>
+                                    <field name="gender"/>
+                                    <field name="date_of_birth"/>
+                                </group>
+                                <group string="Contact">
+                                    <field name="email"/>
+                                    <field name="phone"/>
+                                    <field name="address" widget="text"/>
+                                </group>
+                            </group>
+                        </page>
+
+                        <!-- Tab 2: Academic Info -->
+                        <page string="🎓 Academic" name="academic">
+                            <group>
+                                <group string="Enrollment">
+                                    <!-- Many2one dropdown — MERN: <Select /> -->
+                                    <field name="class_id" options="{'no_create': True}" help="Changing class auto-assigns subjects"/>
+                                    <!-- Many2many tags — MERN: multi-select tags -->
+                                    <field name="subject_ids" widget="many2many_tags" options="{'color_field': 'id'}"/>
+                                    <field name="subject_count" readonly="1"/>
+                                    <field name="has_fee_discount" readonly="1"/>
+                                </group>
+                                <group string="Avatar API">
+                                    <field name="avatar_url" readonly="1" widget="url" string="Avatar URL (DummyJSON)"/>
+                                </group>
+                            </group>
+                        </page>
+
+                        <!-- Tab 3: Attendance — One2many inline table -->
+                        <!-- MERN: nested array / sub-table component -->
+                        <page string="📅 Attendance" name="attendance">
+                            <group>
+                                <group>
+                                    <field name="present_days" readonly="1"/>
+                                    <field name="absent_days" readonly="1"/>
+                                    <field name="attendance_percentage" readonly="1" widget="progressbar"/>
+                                </group>
+                            </group>
+                            <field name="attendance_ids" context="{'default_student_id': active_id}">
+                                <tree editable="bottom" decoration-success="status == 'present'" decoration-danger="status == 'absent'" decoration-warning="status == 'late'">
+                                    <field name="date"/>
+                                    <field name="status" widget="badge"/>
+                                    <field name="note"/>
+                                    <field name="marked_by" readonly="1"/>
+                                </tree>
+                            </field>
+                        </page>
+
+                        <!-- Tab 4: Fees -->
+                        <page string="💰 Fees" name="fees">
+                            <field name="fee_ids" context="{'default_student_id': active_id}">
+                                <tree decoration-danger="state == 'overdue'" decoration-success="state == 'paid'" decoration-warning="state == 'partial'">
+                                    <field name="name"/>
+                                    <field name="fee_type"/>
+                                    <field name="amount"/>
+                                    <field name="discount_percent" string="Disc %"/>
+                                    <field name="final_amount"/>
+                                    <field name="due_date"/>
+                                    <field name="state" widget="badge"/>
+                                    <button name="action_mark_paid" type="object" string="Mark Paid" icon="fa-check" invisible="state == 'paid'"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+
+                <!-- Chatter — like a comment/activity feed -->
+                <!-- MERN: activity log / notifications section -->
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- ================================================================ -->
+    <!--  STUDENT — Search View                                            -->
+    <!--  MERN equivalent: search bar + filter dropdown                   -->
+    <!-- ================================================================ -->
+    <record id="view_student_search" model="ir.ui.view">
+        <field name="name">school.student.search</field>
+        <field name="model">school.student</field>
+        <field name="arch" type="xml">
+            <search string="Search Students">
+                <!-- Search fields -->
+                <field name="name" string="Name"/>
+                <field name="roll_number" string="Roll Number"/>
+                <field name="email" string="Email"/>
+                <field name="class_id" string="Class"/>
+
+                <!-- Filters — MERN: filter buttons / toggle -->
+                <filter string="Draft" name="filter_draft" domain="[('state','=','draft')]"/>
+                <filter string="Confirmed" name="filter_confirmed" domain="[('state','=','confirmed')]"/>
+                <filter string="Graduated" name="filter_graduated" domain="[('state','=','graduated')]"/>
+                <separator/>
+                <filter string="Has Fee Discount" name="filter_discount" domain="[('has_fee_discount','=',True)]"/>
+                <filter string="Low Attendance (&lt;75%)" name="filter_low_attendance" domain="[('attendance_percentage','&lt;',75)]"/>
+                <separator/>
+                <filter string="Archived" name="inactive" domain="[('active','=',False)]"/>
+
+                <!-- Group By — MERN: SQL GROUP BY / Lodash groupBy -->
+                <group expand="0" string="Group By">
+                    <filter string="Class" name="group_class" context="{'group_by': 'class_id'}"/>
+                    <filter string="Status" name="group_state" context="{'group_by': 'state'}"/>
+                    <filter string="Gender" name="group_gender" context="{'group_by': 'gender'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ================================================================ -->
+    <!--  STUDENT — Kanban View                                            -->
+    <!--  MERN equivalent: card grid / board view                         -->
+    <!-- ================================================================ -->
+    <record id="view_student_kanban" model="ir.ui.view">
+        <field name="name">school.student.kanban</field>
+        <field name="model">school.student</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="state" class="o_kanban_small_column">
+                <field name="name"/>
+                <field name="roll_number"/>
+                <field name="class_id"/>
+                <field name="avatar_image"/>
+                <field name="state"/>
+                <field name="attendance_percentage"/>
+                <field name="has_fee_discount"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_card oe_kanban_global_click p-3">
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <img t-att-src="kanban_image('school.student', 'avatar_image', record.id.raw_value)" class="rounded-circle" style="width:40px;height:40px;object-fit:cover;" alt="Avatar"/>
+                                <div>
+                                    <strong>
+                                        <field name="name"/>
+                                    </strong>
+                                    <div class="text-muted small">
+                                        <field name="roll_number"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                Class: <field name="class_id"/>
+                            </div>
+                            <div class="mt-1">
+                                Attendance:
+                                <field name="attendance_percentage"/>
+%
+                            </div>
+                            <div t-if="record.has_fee_discount.raw_value" class="badge badge-success mt-1">
+                                🏷️ Discount
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- ================================================================ -->
+    <!--  ACTION — Window Action (like a React route / page)              -->
+    <!-- ================================================================ -->
+    <record id="action_school_student" model="ir.actions.act_window">
+        <field name="name">Students</field>
+        <field name="res_model">school.student</field>
+        <field name="view_mode">tree,kanban,form</field>
+        <field name="search_view_id" ref="view_student_search"/>
+        <field name="context">{'search_default_filter_confirmed': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No students yet!
+            </p>
+            <p>Add your first student to get started.</p>
+        </field>
+    </record>
+
+</odoo>

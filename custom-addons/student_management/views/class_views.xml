@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Tree View -->
+    <record id="view_class_tree" model="ir.ui.view">
+        <field name="name">school.class.tree</field>
+        <field name="model">school.class</field>
+        <field name="arch" type="xml">
+            <tree string="Classes"
+                  decoration-danger="is_full == True">
+                <field name="name"/>
+                <field name="grade"/>
+                <field name="section"/>
+                <field name="academic_year"/>
+                <field name="teacher_id"/>
+                <field name="student_count" string="Students"/>
+                <field name="max_students" string="Capacity"/>
+                <field name="room_number" optional="show"/>
+                <field name="is_full" string="Full?" widget="boolean_toggle"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_class_form" model="ir.ui.view">
+        <field name="name">school.class.form</field>
+        <field name="model">school.class</field>
+        <field name="arch" type="xml">
+            <form string="Class">
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" placeholder="Class Name (e.g. Class 10-A)"/></h1>
+                    </div>
+
+                    <div class="oe_button_box" name="button_box">
+                        <button class="oe_stat_button" icon="fa-users"
+                                type="object" name="action_view_students">
+                            <field name="student_count" widget="statinfo" string="Students"/>
+                        </button>
+                    </div>
+
+                    <div invisible="is_full == False">
+                        <span class="badge badge-danger">⚠️ Class is Full</span>
+                    </div>
+
+                    <group>
+                        <group string="Class Info">
+                            <field name="name"/>
+                            <field name="code"/>
+                            <field name="grade"/>
+                            <field name="section"/>
+                            <field name="academic_year"/>
+                            <field name="room_number"/>
+                        </group>
+                        <group string="Capacity &amp; Staff">
+                            <field name="max_students"/>
+                            <field name="student_count" readonly="1"/>
+                            <field name="is_full" readonly="1"/>
+                            <!-- Many2one: class teacher — MERN: teacherId ref -->
+                            <field name="teacher_id"
+                                   options="{'no_create': True}"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <!-- Many2many subjects for this class -->
+                        <page string="📚 Subjects" name="subjects">
+                            <field name="subject_ids" widget="many2many_tags"/>
+                            <field name="subject_ids">
+                                <tree editable="bottom">
+                                    <field name="name"/>
+                                    <field name="code"/>
+                                    <field name="teacher_id"/>
+                                    <field name="credit_hours"/>
+                                    <field name="is_elective"/>
+                                </tree>
+                            </field>
+                        </page>
+
+                        <!-- One2many: students in this class -->
+                        <page string="👨‍🎓 Students" name="students">
+                            <field name="student_ids" readonly="1">
+                                <tree>
+                                    <field name="roll_number"/>
+                                    <field name="name"/>
+                                    <field name="age"/>
+                                    <field name="attendance_percentage"/>
+                                    <field name="state" widget="badge"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="view_class_search" model="ir.ui.view">
+        <field name="name">school.class.search</field>
+        <field name="model">school.class</field>
+        <field name="arch" type="xml">
+            <search string="Search Classes">
+                <field name="name"/>
+                <field name="teacher_id"/>
+                <field name="academic_year"/>
+                <filter string="Full Classes" name="filter_full"
+                        domain="[('is_full','=',True)]"/>
+                <filter string="Has Space" name="filter_space"
+                        domain="[('is_full','=',False)]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Grade" name="group_grade"
+                            context="{'group_by': 'grade'}"/>
+                    <filter string="Academic Year" name="group_year"
+                            context="{'group_by': 'academic_year'}"/>
+                    <filter string="Teacher" name="group_teacher"
+                            context="{'group_by': 'teacher_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_school_class" model="ir.actions.act_window">
+        <field name="name">Classes</field>
+        <field name="res_model">school.class</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_class_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No classes yet!</p>
+            <p>Create a class and assign a teacher and students.</p>
+        </field>
+    </record>
+
+</odoo>
