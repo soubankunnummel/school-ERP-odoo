@@ -418,4 +418,45 @@ class Student(models.Model):
 
     def name_get(self):
         return [(rec.id, f"[{rec.roll_number}] {rec.name}") for rec in self]
-        
+    
+    # ------------------------------------------------------------------ #
+    #  @api.model cron auto mark absence                                  #
+    # ------------------------------------------------------------------ #
+
+    @api.model
+    def _cron_auto_mark_absent(self):
+        """
+        Cron job to automatically mark students as absent if they haven't been marked present.
+        """
+        from datetime import date, timedelta
+        import logging
+
+        _logger = logging.getLogger('school.cron')
+
+        settings = self.env['school.settings'].sudo().get_settings()
+
+        if not settings.auto_mark_absent:
+            _logger.info("Cron: Auto-mark absent is disabled in settings.")
+            return
+
+        yesterday = date.today() - timedelta(days=1)
+        students =  self.search([('state', '=', 'confirmed')])
+        count_marked = 0
+
+        for student in students:
+            exisisting = self.env['school.attendance'].sudo().search([
+                ('student_id', '=', student.id),
+                ('date', '=', yesterday)
+            ], limit=1)
+            
+            if not exisisting:
+                self.env['school.attendance'].sudo().create({
+                    'student_id': student.id,
+                    'date': yesterday,
+                    'status': 'absent',
+                    'note': 'Auto-marked as absent by cron job.'
+                })
+                count_marked += 1
+
+        _logger.info(f"Cron: Auto-marked {count_marked} students as absent.")
+        _logger.info('Cron: marked %s students absent for %s', count_marked, yesterday)
